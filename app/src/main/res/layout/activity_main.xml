@@ -1,12 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="${packageName}.${activityClass}">
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@color/background_black"
+    >
 
-    <TextView
-        android:text="@string/hello_world"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+    <ImageView
+        android:layout_width="180dip"
+        android:layout_height="wrap_content"
+        android:src="@drawable/signicat_banner_2"
+        android:layout_marginBottom="150dip"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/banner"
+        android:layout_marginTop="150dip"
+        />
+
+    <Button
+        android:layout_width="250dip"
+        android:layout_height="60dip"
+        android:text="Activate Mobile ID"
+        android:layout_below="@+id/banner"
+        android:layout_centerHorizontal="true"
+        android:onClick="startRegisterActivationClick"
+        android:background="@drawable/button_green"
+        android:id="@+id/startRegisterActivationCode"/>
 
 </RelativeLayout>
