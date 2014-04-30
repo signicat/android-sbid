@@ -1,23 +1,38 @@
 package net.signicat.sbid.app.activity;
 
+import android.app.Activity;
+import android.app.ProgressDialog;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
 
 import net.signicat.sbid.app.R;
+import net.signicat.sbid.app.business.Constants;
 import net.signicat.sbid.app.business.HttpMethods;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 
-public class SbidAuthActivity extends ActionBarActivity {
+public class SbidAuthActivity extends Activity {
+
+    private EditText personalIdEditText;
+    private ProgressDialog progress;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sbid_auth);
+
+        personalIdEditText = (EditText)findViewById(R.id.personalIdEditText);
     }
 
 
@@ -42,19 +57,59 @@ public class SbidAuthActivity extends ActionBarActivity {
     }
 
     public void startAuthCall(View target){
-        AsyncTask<Void, Void, Void> makeHttpCallTask = new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... voids) {
 
+        progress = new ProgressDialog(this);
+        progress.setTitle("Authenticating");
+        progress.setMessage("Please wait...");
+        progress.show();
+
+        AsyncTask<Void, Void, String> makeHttpCallTask = new AsyncTask<Void, Void, String>() {
+            @Override
+            protected String doInBackground(Void... voids) {
+                String answer = null;
                 try {
-                    HttpMethods.SbidAuthenticateCall();
+                    answer = HttpMethods.SbidAuthenticateCall(personalIdEditText.getText().toString());
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
 
-                return null;
+                return answer;
+            }
+
+            @Override
+            protected void onPostExecute(String ans){
+                handleAuthResponse(ans);
+                progress.dismiss();
             }
         };
         makeHttpCallTask.execute();
+    }
+
+    private void handleAuthResponse(String authResponse){
+        try {
+            JSONObject jsonObject = new JSONObject(authResponse);
+            String errorMessage = jsonObject.getString("error");
+            Log.d(Constants.TAG_SBID_AUTH, errorMessage);
+
+            if(errorMessage == null || errorMessage == "null"){
+                createAndStartSbidIntent(jsonObject);
+            }
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void createAndStartSbidIntent(JSONObject jsonObject) throws JSONException {
+
+        String autoStartToken = jsonObject.getString("autoStartToken");
+
+        Intent intent = new Intent();
+        intent.setPackage("com.bankid.bus");
+        intent.setAction(Intent.ACTION_VIEW);
+        intent.addCategory(Intent.CATEGORY_BROWSABLE); //optional intent.addCategory(Intent.CATEGORY_DEFAULT); //optional
+        intent.setType("bankid");
+        intent.setData(Uri.parse("bankid://autostarttoken=<" + autoStartToken + ">&redirect=null ")) ;
+        startActivityForResult(intent, 0);
     }
 }

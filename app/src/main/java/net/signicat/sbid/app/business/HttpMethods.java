@@ -83,7 +83,7 @@ public class HttpMethods {
         Log.d(Constants.TAG_TESTING, result);
     }
 
-    public static String SbidAuthenticateCall() throws IOException {
+    public static String SbidAuthenticateCall(String personalId) throws IOException {
         String url = "https://dev01.signicat.com/std/method/nbidmobile/?id=sbid2014::";
 
         HttpClient httpClient = _getNewHttpClient();
@@ -91,12 +91,12 @@ public class HttpMethods {
         HttpPost httpPost = new HttpPost(url);
         httpPost.setHeader("Accept", "application/json");
         httpPost.setHeader("Content-type", "application/json");
-        httpPost.setEntity(new StringEntity("{ \"subject\": \"197611195616\" }"));
+        httpPost.setEntity(new StringEntity("{ \"subject\": \""+personalId+"\" }"));
 
         HttpResponse httpResponse = PerformHttpPost(httpClient, httpPost);
         String result = HttpResponseToString(httpResponse);
         Log.d(Constants.TAG_SBID_AUTH, result);
-        return null;
+        return result;
     }
 
     private static String UrlEncodeStrings(String urlString, String queryString){
