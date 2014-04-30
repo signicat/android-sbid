@@ -43,7 +43,8 @@ public class MainActivity extends Activity {
             protected Void doInBackground(Void... voids) {
 
                 try {
-                    HttpMethods.DummyAtbCallForTesting();
+                    HttpMethods.DummyHttpGet();
+                    HttpMethods.DummyHttpPost();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
