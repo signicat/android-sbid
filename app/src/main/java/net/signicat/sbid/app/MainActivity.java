@@ -41,7 +41,13 @@ public class MainActivity extends Activity {
         AsyncTask<Void, Void, Void> makeHttpCallTask = new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... voids) {
-                HttpMethods.DummyAtbCallForTesting();
+
+                try {
+                    HttpMethods.DummyAtbCallForTesting();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
                 return null;
             }
         };

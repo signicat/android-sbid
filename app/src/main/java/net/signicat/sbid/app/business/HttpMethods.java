@@ -2,10 +2,12 @@ package net.signicat.sbid.app.business;
 
 import android.util.Log;
 
+import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
@@ -25,46 +27,61 @@ import java.net.URLEncoder;
  */
 public class HttpMethods {
 
-    public static void DummyAtbCallForTesting(){
-        String query = "Fra solsiden til sluppen";
+    public static void DummyAtbCallForTesting() throws IOException {
+        String url = UrlEncodeStrings("http://www.atb.no/xmlhttprequest.php?service=routeplannerOracle.getOracleAnswer&question=", "Fra solsiden til sluppen");
+
+        Log.d(Constants.TAG_TESTING, url);
+
+        HttpClient httpClient = GetBasicHttpClient();
+        HttpGet httpGet = new HttpGet(url.toString());
+        HttpResponse httpResponse = PerformHttp(httpClient, httpGet);
+
+        String result = HttpResponseToString(httpResponse);
+
+        Log.d(Constants.TAG_TESTING, result);
+    }
+
+    public static String SbidAuthenticateCall(){
+        return null;
+    }
+
+    private static String UrlEncodeStrings(String urlString, String queryString){
         try {
-            query = URLEncoder.encode(query, "UTF-8");
+            queryString = URLEncoder.encode(queryString, "UTF-8");
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
         URL url = null;
         try {
-            url = new URL("http://www.atb.no/xmlhttprequest.php?service=routeplannerOracle.getOracleAnswer&question="+ query);
+            url = new URL(urlString+ queryString);
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
+        return url.toString();
+    }
 
-        Log.d(Constants.TAG_TESTING, url.toString());
-
+    private static HttpClient GetBasicHttpClient(){
         HttpParams httpParams = new BasicHttpParams();
         HttpConnectionParams.setConnectionTimeout(httpParams, 30000);
         HttpConnectionParams.setSoTimeout(httpParams, 30000);
         HttpClient httpClient = new DefaultHttpClient(httpParams);
-        HttpGet httpGet = new HttpGet(url.toString());
+        return httpClient;
+    }
+
+    private static HttpResponse PerformHttp(HttpClient httpClient, HttpRequestBase httpRequest) throws IOException {
         HttpResponse httpResponse;
+        httpResponse = httpClient.execute(httpRequest);
+        return  httpResponse;
+    }
 
+    private static String HttpResponseToString(HttpResponse httpResponse) throws IOException {
         String result = "";
-
-        try {
-            httpResponse = httpClient.execute(httpGet);
-            InputStream data = httpResponse.getEntity().getContent();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(data));
-            String line;
-            while ((line = reader.readLine()) != null){
-                result += line;
-            }
-
-        } catch (ClientProtocolException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+        InputStream data = httpResponse.getEntity().getContent();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(data));
+        String line;
+        while ((line = reader.readLine()) != null){
+            result += line;
         }
-
-        Log.d(Constants.TAG_TESTING, result);
+        return result;
     }
 }
