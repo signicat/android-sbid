@@ -1,6 +1,7 @@
-package net.signicat.sbid.app;
+package net.signicat.sbid.app.activity;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -8,6 +9,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import net.signicat.sbid.app.R;
+import net.signicat.sbid.app.activity.TestActivity;
 import net.signicat.sbid.app.business.HttpMethods;
 
 import org.apache.http.HttpResponse;
@@ -36,22 +39,11 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
     }
 
+    public void startTestActivity(View target){
+        startActivity(new Intent(this, TestActivity.class));
+    }
 
-    public void startAuthCall(View target){
-        AsyncTask<Void, Void, Void> makeHttpCallTask = new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... voids) {
-
-                try {
-                    HttpMethods.DummyHttpGet();
-                    HttpMethods.DummyHttpPost();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                return null;
-            }
-        };
-        makeHttpCallTask.execute();
+    public void startAuthActivity(View target){
+        startActivity(new Intent(this, SbidAuthActivity.class));
     }
 }

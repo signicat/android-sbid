@@ -19,22 +19,11 @@
     <Button
         android:layout_width="250dip"
         android:layout_height="60dip"
-        android:text="Testing"
+        android:text="Start auth"
         android:layout_below="@+id/banner"
         android:layout_centerHorizontal="true"
-        android:onClick="startTestActivity"
+        android:onClick="startAuthCall"
         android:background="@drawable/button_green"
-        android:id="@+id/startTestingButton"
-        android:layout_marginBottom="20dip"
-        />
-    <Button
-        android:layout_width="250dip"
-        android:layout_height="60dip"
-        android:text="Sbid testing"
-        android:layout_below="@+id/startTestingButton"
-        android:layout_centerHorizontal="true"
-        android:onClick="startAuthActivity"
-        android:background="@drawable/button_green"
-        android:id="@+id/startSbidButton"/>
+        android:id="@+id/testHttpGet"/>
 
 </RelativeLayout>

@@ -19,22 +19,21 @@
     <Button
         android:layout_width="250dip"
         android:layout_height="60dip"
-        android:text="Testing"
+        android:text="Make GET call"
         android:layout_below="@+id/banner"
         android:layout_centerHorizontal="true"
-        android:onClick="startTestActivity"
+        android:onClick="startDummyHttpCall"
         android:background="@drawable/button_green"
-        android:id="@+id/startTestingButton"
-        android:layout_marginBottom="20dip"
-        />
+        android:id="@+id/testHttpGet"/>
+
     <Button
         android:layout_width="250dip"
         android:layout_height="60dip"
-        android:text="Sbid testing"
-        android:layout_below="@+id/startTestingButton"
+        android:text="Make POST call"
+        android:layout_below="@+id/testHttpGet"
         android:layout_centerHorizontal="true"
-        android:onClick="startAuthActivity"
+        android:onClick="startDummyHttpCall"
         android:background="@drawable/button_green"
-        android:id="@+id/startSbidButton"/>
+        android:id="@+id/testHttpPost"/>
 
 </RelativeLayout>
