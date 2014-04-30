@@ -8,3 +8,7 @@
 /.gradle/1.10/taskArtifacts/fileHashes.bin
 /.gradle/1.10/taskArtifacts/fileSnapshots.bin
 /.gradle/1.10/taskArtifacts/taskArtifacts.bin
+
+.DS_Store
+
+*.bin

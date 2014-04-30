@@ -19,10 +19,10 @@
     <Button
         android:layout_width="250dip"
         android:layout_height="60dip"
-        android:text="Activate Mobile ID"
+        android:text="Make http call"
         android:layout_below="@+id/banner"
         android:layout_centerHorizontal="true"
-        android:onClick="startRegisterActivationClick"
+        android:onClick="startAuthCall"
         android:background="@drawable/button_green"
         android:id="@+id/startRegisterActivationCode"/>
 
