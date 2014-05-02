@@ -10,7 +10,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name=".activity.MainActivity"
+            android:name="net.signicat.sbid.app.activity.MainActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait"
             android:theme="@android:style/Theme.Holo.NoActionBar" >
@@ -21,16 +21,20 @@
             </intent-filter>
         </activity>
         <activity
-            android:screenOrientation="portrait"
-            android:theme="@android:style/Theme.Holo.NoActionBar"
             android:name="net.signicat.sbid.app.activity.TestActivity"
-            android:label="@string/title_activity_test" >
+            android:label="@string/title_activity_test"
+            android:screenOrientation="portrait"
+            android:theme="@android:style/Theme.Holo.NoActionBar" >
         </activity>
         <activity
-            android:screenOrientation="portrait"
-            android:theme="@android:style/Theme.Holo.NoActionBar"
             android:name="net.signicat.sbid.app.activity.SbidAuthActivity"
-            android:label="@string/title_activity_sbid_auth" >
+            android:label="@string/title_activity_sbid_auth"
+            android:screenOrientation="portrait"
+            android:theme="@android:style/Theme.Holo.NoActionBar" >
+        </activity>
+        <activity
+            android:name="net.signicat.sbid.app.activity.SuccessActivity"
+            android:label="@string/title_activity_success" >
         </activity>
     </application>
 

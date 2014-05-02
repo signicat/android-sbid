@@ -12,6 +12,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import net.signicat.sbid.app.R;
 import net.signicat.sbid.app.business.Constants;
@@ -25,7 +26,6 @@ import java.io.IOException;
 public class SbidAuthActivity extends Activity {
 
     private EditText personalIdEditText;
-    private ProgressDialog progress;
     private HttpMethods httpMethods;
 
     //Todo these should be stored and retrieved in a proper and safe manner
@@ -39,14 +39,14 @@ public class SbidAuthActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sbid_auth);
 
-        personalIdEditText = (EditText)findViewById(R.id.personalIdEditText);
+        personalIdEditText = (EditText) findViewById(R.id.personalIdEditText);
         httpMethods = new HttpMethods();
     }
 
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        
+
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.sbid_auth, menu);
         return true;
@@ -64,9 +64,9 @@ public class SbidAuthActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void startAuthCall(View target){
+    public void startAuthCall(View target) {
 
-        progress = new ProgressDialog(this);
+        ProgressDialog progress = new ProgressDialog(this);
         progress.setTitle("Authenticating");
         progress.setMessage("Please wait...");
         progress.show();
@@ -85,26 +85,25 @@ public class SbidAuthActivity extends Activity {
             }
 
             @Override
-            protected void onPostExecute(String ans){
+            protected void onPostExecute(String ans) {
                 handleAuthResponse(ans);
-                progress.dismiss();
             }
         };
         makeHttpCallTask.execute();
     }
 
-    private void handleAuthResponse(String authResponse){
+    private void handleAuthResponse(String authResponse) {
         try {
             authCallResponseObject = new JSONObject(authResponse);
             String errorMessage = null;
-            if(authCallResponseObject.has("error")){
+            if (authCallResponseObject.has("error")) {
                 errorMessage = authCallResponseObject.getString("error");
                 Log.d(Constants.TAG_SBID_AUTH, errorMessage);
             }
 
-            if(errorMessage == null || errorMessage == "null"){
+            if (errorMessage == null || errorMessage == "null") {
                 createAndStartSbidIntent(authCallResponseObject);
-            }else if(errorMessage == Constants.ErrorMessageFromServer.ALREADY_IN_PROGRESS.getValue()){
+            } else if (errorMessage == Constants.ErrorMessageFromServer.ALREADY_IN_PROGRESS.getValue()) {
                 showMessageToUser(Constants.ErrorMessageToUser.RFA3.getMessage());
                 //Todo handle case correctly
             }
@@ -115,7 +114,7 @@ public class SbidAuthActivity extends Activity {
     }
 
     private void startCollectCall() throws JSONException {
-        progress = new ProgressDialog(this);
+        final ProgressDialog progress = new ProgressDialog(this);
         progress.setTitle("Collecting the call");
         progress.setMessage("Please wait...");
         progress.show();
@@ -137,15 +136,107 @@ public class SbidAuthActivity extends Activity {
             }
 
             @Override
-            protected void onPostExecute(String ans){
-                handleAuthResponse(ans);
+            protected void onPostExecute(String ans) {
+                try {
+                    handleCollectCallResponse(ans);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
                 progress.dismiss();
             }
         };
         makeHttpCallTask.execute();
     }
 
-    private void showMessageToUser(String message){
+    private void handleCollectCallResponse(String answer) throws JSONException {
+        showToast("handleCollectCallResponse");
+        JSONObject collectResponseObject = new JSONObject(answer);
+        startCompleteCall(collectResponseObject);
+    }
+
+    private void startCompleteCall(JSONObject collectResponseObject) throws JSONException {
+
+        final ProgressDialog progress = new ProgressDialog(this);
+        progress.setTitle("Completing the call");
+        progress.setMessage("Please wait...");
+        progress.show();
+
+        String complete = collectResponseObject.getString("progressStatus");
+        final String completeUrl = collectResponseObject.getString("completeUrl");
+        AsyncTask<Void, Void, String> makeHttpCallTask = new AsyncTask<Void, Void, String>() {
+            @Override
+            protected String doInBackground(Void... voids) {
+                String answer = null;
+                try {
+                    answer = httpMethods.SbidGetCompleteCall(completeUrl);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                return answer;
+            }
+
+            @Override
+            protected void onPostExecute(String ans) {
+                try {
+                    handleCompleteCall(ans);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                progress.dismiss();
+            }
+        };
+        makeHttpCallTask.execute();
+    }
+
+    private void handleCompleteCall(String answer) throws JSONException {
+        showToast("HandleCompleteCall");
+        Log.d(Constants.TAG_SBID_AUTH, answer);
+        JSONObject jsonObject = new JSONObject(answer);
+        String saml = jsonObject.getString("SAMLResponse");
+        String target = jsonObject.getString("target");
+        startVerifySamlResponseCall(saml, target);
+    }
+
+    private void startVerifySamlResponseCall(String saml, final String target){
+        final ProgressDialog progress = new ProgressDialog(this);
+        progress.setTitle("Verifying the SAML!");
+        progress.setMessage("Please wait...");
+        progress.show();
+
+        final String samlFinal = saml;
+        final String targetFinal = target;
+
+        AsyncTask<Void, Void, String> makeHttpCallTask = new AsyncTask<Void, Void, String>() {
+            @Override
+            protected String doInBackground(Void... voids) {
+                String answer = null;
+                try {
+                    answer = httpMethods.SignicatVerifyCall(samlFinal, targetFinal);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                return answer;
+            }
+
+            @Override
+            protected void onPostExecute(String ans) {
+
+                handleVerifyResponse(ans);
+                progress.dismiss();
+            }
+        };
+        makeHttpCallTask.execute();
+    }
+
+    private void handleVerifyResponse(String ans){
+        showToast("handleVerifyResponse");
+        Log.d(Constants.TAG_SBID_AUTH, ans);
+        startActivity(new Intent(SbidAuthActivity.this, SuccessActivity.class));
+    }
+
+    private void showMessageToUser(String message) {
         //Todo show message to user;
     }
 
@@ -158,22 +249,28 @@ public class SbidAuthActivity extends Activity {
         intent.setAction(Intent.ACTION_VIEW);
         intent.addCategory(Intent.CATEGORY_BROWSABLE); //optional intent.addCategory(Intent.CATEGORY_DEFAULT); //optional
         intent.setType("bankid");
-        intent.setData(Uri.parse("bankid://autostarttoken=<" + autoStartToken + ">&redirect=null ")) ;
+        intent.setData(Uri.parse("bankid://autostarttoken=<" + autoStartToken + ">&redirect=null "));
         startActivityForResult(intent, 0);
 
         sbidClientStarted = true;
     }
 
     @Override
-    protected void onResume(){
+    protected void onResume() {
         super.onResume();
-        if(sbidClientStarted && authCallResponseObject != null){
+        if (sbidClientStarted && authCallResponseObject != null) {
             try {
                 startCollectCall();
+                sbidClientStarted = false;
             } catch (JSONException e) {
                 e.printStackTrace();
             }
         }
+    }
+
+    private void showToast(String message){
+        Toast toast = Toast.makeText(this, message, Toast.LENGTH_LONG);
+        toast.show();
     }
 
 }

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@color/background_black"
+    >
+
+    <ImageView
+        android:layout_width="180dip"
+        android:layout_height="wrap_content"
+        android:src="@drawable/signicat_banner_2"
+        android:layout_marginBottom="150dip"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/banner"
+        android:layout_marginTop="120dip"
+        />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="SUCCESS!"
+        android:textSize="40sp"
+        android:textColor="@color/signicat_white"
+        android:visibility="visible"
+        android:layout_below="@+id/banner"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/startTestingButton"
+        android:layout_marginBottom="20dip"
+        />
+
+</RelativeLayout>
