@@ -8,23 +8,29 @@ import org.apache.http.HttpVersion;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.CookieStore;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.client.protocol.ClientContext;
 import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.cookie.Cookie;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
+import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HTTP;
+import org.apache.http.protocol.HttpContext;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -42,6 +48,8 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
@@ -53,37 +61,18 @@ import javax.security.cert.X509Certificate;
  */
 public class HttpMethods {
 
-    public static void DummyHttpGet() throws IOException {
-        String url = UrlEncodeStrings("http://www.atb.no/xmlhttprequest.php?service=routeplannerOracle.getOracleAnswer&question=", "Fra solsiden til sluppen");
+    private ArrayList<Cookie> cookieList;
+    private CookieStore cookieStore;
+    private HttpContext httpContext;
 
-        Log.d(Constants.TAG_TESTING, url);
-
-        HttpClient httpClient = GetBasicHttpClient();
-        HttpGet httpGet = new HttpGet(url.toString());
-        HttpResponse httpResponse = PerformHttpGet(httpClient, httpGet);
-
-        String result = HttpResponseToString(httpResponse);
-
-        Log.d(Constants.TAG_TESTING, result);
+    public HttpMethods(){
+        cookieList = new ArrayList<Cookie>();
+        cookieStore = new BasicCookieStore();
+        httpContext = new BasicHttpContext();
+        httpContext.setAttribute(ClientContext.COOKIE_STORE, cookieStore);
     }
 
-    public static void DummyHttpPost() throws IOException {
-//        String url = UrlEncodeStrings("http://posttestserver.com/post.php", "?dir=testytest");
-//        Log.d(Constants.TAG_TESTING, url);
-        String url = "http://posttestserver.com/post.php?dir=testytest";
-
-        HttpClient httpClient = GetBasicHttpClient();
-        HttpPost httpPost = new HttpPost(url);
-        httpPost.setHeader("Accept", "application/json");
-        httpPost.setHeader("Content-type", "application/json");
-        httpPost.setEntity(new StringEntity("{\"filters\":true}"));
-
-        HttpResponse httpResponse = PerformHttpPost(httpClient, httpPost);
-        String result = HttpResponseToString(httpResponse);
-        Log.d(Constants.TAG_TESTING, result);
-    }
-
-    public static String SbidAuthenticateCall(String personalId) throws IOException {
+    public String SbidAuthenticateCall(String personalId) throws IOException {
         String url = "https://dev01.signicat.com/std/method/nbidmobile/?id=sbid2014::";
 
         HttpClient httpClient = _getNewHttpClient();
@@ -93,7 +82,31 @@ public class HttpMethods {
         httpPost.setHeader("Content-type", "application/json");
         httpPost.setEntity(new StringEntity("{ \"subject\": \""+personalId+"\" }"));
 
-        HttpResponse httpResponse = PerformHttpPost(httpClient, httpPost);
+        HttpResponse httpResponse = PerformHttpPost(httpClient, httpPost, httpContext);
+
+        if(cookieStore.getCookies().size() > 0){
+            Log.d(Constants.TAG_SBID_AUTH, "Got some cookies!");
+        }
+
+        String result = HttpResponseToString(httpResponse);
+        Log.d(Constants.TAG_SBID_AUTH, result);
+        return result;
+    }
+
+    public String SbidCollectCall(String orderRef, String collectUrl) throws IOException {
+        String url = collectUrl;
+
+        HttpClient httpClient = _getNewHttpClient();
+
+        HttpPost httpPost = new HttpPost(url);
+        httpPost.setHeader("Accept", "application/json");
+        httpPost.setHeader("Content-type", "application/json");
+        httpPost.setEntity(new StringEntity("{ \"orderRef\": \""+orderRef+"\" }"));
+
+        HttpResponse httpResponse = PerformHttpPost(httpClient, httpPost, httpContext);
+        if(cookieStore.getCookies().size() > 0){
+            Log.d(Constants.TAG_SBID_AUTH, "Got some cookies!");
+        }
         String result = HttpResponseToString(httpResponse);
         Log.d(Constants.TAG_SBID_AUTH, result);
         return result;
@@ -127,8 +140,8 @@ public class HttpMethods {
         return  httpResponse;
     }
 
-    private static HttpResponse PerformHttpPost(HttpClient httpClient, HttpPost httpPost) throws IOException {
-        HttpResponse httpResponse = httpClient.execute(httpPost);
+    private static HttpResponse PerformHttpPost(HttpClient httpClient, HttpPost httpPost, HttpContext httpContext) throws IOException {
+        HttpResponse httpResponse = httpClient.execute(httpPost, httpContext);
         return httpResponse;
     }
 

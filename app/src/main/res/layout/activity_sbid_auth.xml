@@ -20,7 +20,7 @@
         />
     <EditText
         android:inputType="number"
-        android:text="197611195616"
+        android:text="198309172974"
         android:layout_below="@+id/infoText"
         android:id="@+id/personalIdEditText"
         android:textSize="@dimen/codeTextSize"

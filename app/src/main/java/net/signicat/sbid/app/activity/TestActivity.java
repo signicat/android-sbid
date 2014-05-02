@@ -42,21 +42,21 @@ public class TestActivity extends ActionBarActivity {
     }
 
     public void startDummyHttpCall(View target){
-        AsyncTask<Void, Void, Void> makeHttpCallTask = new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... voids) {
-
-                try {
-                    HttpMethods.DummyHttpGet();
-                    HttpMethods.DummyHttpPost();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                return null;
-            }
-        };
-        makeHttpCallTask.execute();
+//        AsyncTask<Void, Void, Void> makeHttpCallTask = new AsyncTask<Void, Void, Void>() {
+//            @Override
+//            protected Void doInBackground(Void... voids) {
+//
+//                try {
+//                    HttpMethods.DummyHttpGet();
+//                    HttpMethods.DummyHttpPost();
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//
+//                return null;
+//            }
+//        };
+//        makeHttpCallTask.execute();
     }
 
 }

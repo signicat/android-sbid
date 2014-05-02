@@ -9,4 +9,29 @@ public class Constants {
     public static String TAG_SBID_AUTH = "SBID_AUTH";
 
     public static String SBID_AUTH_URL = "https://sbid.com";
+
+    public enum ErrorMessageFromServer{
+        ALREADY_IN_PROGRESS("ALREADY_IN_PROGRESS");
+
+        private String value;
+        private ErrorMessageFromServer(String i){
+            this.value = i;
+        }
+
+        public String getValue() {
+            return value;
+        }
+    }
+
+    public enum ErrorMessageToUser{
+        RFA3("Action cancelled. Please try again.");
+        private String message;
+        private ErrorMessageToUser(String message){
+            this.message = message;
+        }
+
+        public String getMessage() {
+            return message;
+        }
+    }
 }

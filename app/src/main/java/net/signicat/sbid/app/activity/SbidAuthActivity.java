@@ -26,6 +26,13 @@ public class SbidAuthActivity extends Activity {
 
     private EditText personalIdEditText;
     private ProgressDialog progress;
+    private HttpMethods httpMethods;
+
+    //Todo these should be stored and retrieved in a proper and safe manner
+    private JSONObject authCallResponseObject;
+
+    //Todo this is very ugly and should be replaced with fancy intent messaging!
+    private boolean sbidClientStarted = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,6 +40,7 @@ public class SbidAuthActivity extends Activity {
         setContentView(R.layout.activity_sbid_auth);
 
         personalIdEditText = (EditText)findViewById(R.id.personalIdEditText);
+        httpMethods = new HttpMethods();
     }
 
 
@@ -68,7 +76,7 @@ public class SbidAuthActivity extends Activity {
             protected String doInBackground(Void... voids) {
                 String answer = null;
                 try {
-                    answer = HttpMethods.SbidAuthenticateCall(personalIdEditText.getText().toString());
+                    answer = httpMethods.SbidAuthenticateCall(personalIdEditText.getText().toString());
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -87,17 +95,58 @@ public class SbidAuthActivity extends Activity {
 
     private void handleAuthResponse(String authResponse){
         try {
-            JSONObject jsonObject = new JSONObject(authResponse);
-            String errorMessage = jsonObject.getString("error");
-            Log.d(Constants.TAG_SBID_AUTH, errorMessage);
+            authCallResponseObject = new JSONObject(authResponse);
+            String errorMessage = null;
+            if(authCallResponseObject.has("error")){
+                errorMessage = authCallResponseObject.getString("error");
+                Log.d(Constants.TAG_SBID_AUTH, errorMessage);
+            }
 
             if(errorMessage == null || errorMessage == "null"){
-                createAndStartSbidIntent(jsonObject);
+                createAndStartSbidIntent(authCallResponseObject);
+            }else if(errorMessage == Constants.ErrorMessageFromServer.ALREADY_IN_PROGRESS.getValue()){
+                showMessageToUser(Constants.ErrorMessageToUser.RFA3.getMessage());
+                //Todo handle case correctly
             }
 
         } catch (JSONException e) {
             e.printStackTrace();
         }
+    }
+
+    private void startCollectCall() throws JSONException {
+        progress = new ProgressDialog(this);
+        progress.setTitle("Collecting the call");
+        progress.setMessage("Please wait...");
+        progress.show();
+
+        final String orderRef = authCallResponseObject.getString("orderRef");
+        final String collectUrl = authCallResponseObject.getString("collectUrl");
+
+        AsyncTask<Void, Void, String> makeHttpCallTask = new AsyncTask<Void, Void, String>() {
+            @Override
+            protected String doInBackground(Void... voids) {
+                String answer = null;
+                try {
+                    answer = httpMethods.SbidCollectCall(orderRef, collectUrl);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                return answer;
+            }
+
+            @Override
+            protected void onPostExecute(String ans){
+                handleAuthResponse(ans);
+                progress.dismiss();
+            }
+        };
+        makeHttpCallTask.execute();
+    }
+
+    private void showMessageToUser(String message){
+        //Todo show message to user;
     }
 
     private void createAndStartSbidIntent(JSONObject jsonObject) throws JSONException {
@@ -111,5 +160,20 @@ public class SbidAuthActivity extends Activity {
         intent.setType("bankid");
         intent.setData(Uri.parse("bankid://autostarttoken=<" + autoStartToken + ">&redirect=null ")) ;
         startActivityForResult(intent, 0);
+
+        sbidClientStarted = true;
     }
+
+    @Override
+    protected void onResume(){
+        super.onResume();
+        if(sbidClientStarted && authCallResponseObject != null){
+            try {
+                startCollectCall();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
 }
