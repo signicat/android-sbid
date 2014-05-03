@@ -77,7 +77,16 @@ public class HttpMethods {
     }
 
     public String SbidAuthenticateCall(String personalId) throws IOException {
-        String url = "https://dev01.signicat.com/std/method/nbidmobile/?id=sbid2014::";
+        // The target parameter is used to restrict the "audience"
+        // of the SAML response, i.e. the intended recipient of the
+        // SAML assertion. In a browser SAML 1.1 POST/Redirect, the
+        // SAML response is HTTP POSTed to the target URL, which
+        // validates the SAML -- including the audience.
+        // In this case, there is no browser, but the app sets the
+        // target anyway so that it may still be validated on the
+        // server along with the SAML assertion.
+        String target = URLEncoder.encode(Constants.TARGET, "UTF-8");
+        String url = "https://beta.signicat.com/std/method/signicat/?id=sbid2014::&" + target;
 
         HttpClient httpClient = _getNewHttpClient();
 
@@ -130,11 +139,10 @@ public class HttpMethods {
     }
 
     public String SignicatVerifyCall(String samlString, String target) throws IOException {
-        String url = "https://labs.signicat.com/catwalk/saml/getattributes";
 
         HttpClient httpClient = _getNewHttpClient();
 
-        HttpPost httpPost = new HttpPost(url);
+        HttpPost httpPost = new HttpPost(Constants.TARGET);
         List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
         nameValuePairs.add(new BasicNameValuePair("SAMLResponse", samlString));
         nameValuePairs.add(new BasicNameValuePair("target", target));
