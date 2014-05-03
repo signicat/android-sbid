@@ -86,7 +86,7 @@ public class HttpMethods {
         // target anyway so that it may still be validated on the
         // server along with the SAML assertion.
         String target = URLEncoder.encode(Constants.TARGET, "UTF-8");
-        String url = "https://beta.signicat.com/std/method/signicat/?id=sbid2014::&" + target;
+        String url = "https://beta.signicat.com/std/method/signicat/?id=sbid2014::&target=" + target;
 
         HttpClient httpClient = _getNewHttpClient();
 
