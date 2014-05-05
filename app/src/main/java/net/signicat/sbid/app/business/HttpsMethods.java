@@ -66,19 +66,26 @@ import javax.security.cert.X509Certificate;
  */
 public class HttpsMethods {
 
-    private ArrayList<Cookie> cookieList;
     private CookieStore cookieStore;
     private HttpContext httpContext;
 
     public HttpsMethods(){
-        cookieList = new ArrayList<Cookie>();
         cookieStore = new BasicCookieStore();
         httpContext = new BasicHttpContext();
         httpContext.setAttribute(ClientContext.COOKIE_STORE, cookieStore);
     }
 
     public String SbidAuthenticateCall(String personalId) throws IOException {
-        String url = ConfigConstants.RP_AUTH_URL;
+        // The target parameter is used to restrict the "audience"
+        // of the SAML response, i.e. the intended recipient of the
+        // SAML assertion. In a browser SAML 1.1 POST/Redirect, the
+        // SAML response is HTTP POSTed to the target URL, which
+        // validates the SAML -- including the audience.
+        // In this case, there is no browser, but the app sets the
+        // target anyway so that it may still be validated on the
+        // server along with the SAML assertion.
+        String target = URLEncoder.encode(Constants.TARGET, "UTF-8");
+        String url = ConfigConstants.RP_AUTH_URL + target;
 
         HttpClient httpClient = getNewHttpClient();
 
@@ -105,9 +112,6 @@ public class HttpsMethods {
         httpPost.setEntity(new StringEntity("{ \"orderRef\": \""+orderRef+"\" }"));
 
         HttpResponse httpResponse = PerformHttpPost(httpClient, httpPost, httpContext);
-        if(cookieStore.getCookies().size() > 0){
-            Log.d(Constants.TAG_SBID_AUTH, "Got some cookies!");
-        }
         String result = HttpResponseToString(httpResponse);
         return result;
     }
@@ -129,18 +133,14 @@ public class HttpsMethods {
 
         HttpClient httpClient = getNewHttpClient();
 
-        HttpPost httpPost = new HttpPost(url);
+        HttpPost httpPost = new HttpPost(Constants.TARGET);
         List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
         nameValuePairs.add(new BasicNameValuePair("SAMLResponse", samlString));
         nameValuePairs.add(new BasicNameValuePair("target", target));
         httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 
         HttpResponse httpResponse = PerformHttpPost(httpClient, httpPost, httpContext);
-        if(cookieStore.getCookies().size() > 0){
-            Log.d(Constants.TAG_SBID_AUTH, "Got some cookies!");
-        }
         String result = HttpResponseToString(httpResponse);
-        Log.d(Constants.TAG_SBID_AUTH, result);
         return result;
     }
 
