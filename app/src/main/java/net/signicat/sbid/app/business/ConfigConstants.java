@@ -9,4 +9,5 @@ public class ConfigConstants {
     public static String RP_VALIDATE_SAML_URL = "https://labs.signicat.com/catwalk/saml/getattributes";
 
     public static String SIGNICAT_API_KEY = "1234567890";
+    public static String TARGET = "https://labs.signicat.com/catwalk/saml/getattributes";
 }

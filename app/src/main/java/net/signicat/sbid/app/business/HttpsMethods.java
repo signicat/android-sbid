@@ -84,7 +84,7 @@ public class HttpsMethods {
         // In this case, there is no browser, but the app sets the
         // target anyway so that it may still be validated on the
         // server along with the SAML assertion.
-        String target = URLEncoder.encode(Constants.TARGET, "UTF-8");
+        String target = URLEncoder.encode(ConfigConstants.TARGET, "UTF-8");
         String url = ConfigConstants.RP_AUTH_URL + target;
 
         HttpClient httpClient = getNewHttpClient();
@@ -133,7 +133,7 @@ public class HttpsMethods {
 
         HttpClient httpClient = getNewHttpClient();
 
-        HttpPost httpPost = new HttpPost(Constants.TARGET);
+        HttpPost httpPost = new HttpPost(ConfigConstants.TARGET);
         List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
         nameValuePairs.add(new BasicNameValuePair("SAMLResponse", samlString));
         nameValuePairs.add(new BasicNameValuePair("target", target));
