@@ -26,6 +26,7 @@ import org.apache.http.cookie.Cookie;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.SingleClientConnManager;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.BasicHttpParams;
@@ -63,13 +64,13 @@ import javax.security.cert.X509Certificate;
 /**
  * Created by Martin on 30.04.14.
  */
-public class HttpMethods {
+public class HttpsMethods {
 
     private ArrayList<Cookie> cookieList;
     private CookieStore cookieStore;
     private HttpContext httpContext;
 
-    public HttpMethods(){
+    public HttpsMethods(){
         cookieList = new ArrayList<Cookie>();
         cookieStore = new BasicCookieStore();
         httpContext = new BasicHttpContext();
@@ -77,30 +78,26 @@ public class HttpMethods {
     }
 
     public String SbidAuthenticateCall(String personalId) throws IOException {
-        String url = "https://dev01.signicat.com/std/method/nbidmobile/?id=sbid2014::";
+        String url = ConfigConstants.RP_AUTH_URL;
 
-        HttpClient httpClient = _getNewHttpClient();
+        HttpClient httpClient = getNewHttpClient();
 
         HttpPost httpPost = new HttpPost(url);
         httpPost.setHeader("Accept", "application/json");
         httpPost.setHeader("Content-type", "application/json");
         httpPost.setEntity(new StringEntity("{ \"subject\": \""+personalId+"\" }"));
+        httpPost.setEntity(new StringEntity("{ \"apiKey\": \""+ConfigConstants.SIGNICAT_API_KEY+"\" }"));
 
         HttpResponse httpResponse = PerformHttpPost(httpClient, httpPost, httpContext);
 
-        if(cookieStore.getCookies().size() > 0){
-            Log.d(Constants.TAG_SBID_AUTH, "Got some cookies!");
-        }
-
         String result = HttpResponseToString(httpResponse);
-        Log.d(Constants.TAG_SBID_AUTH, result);
         return result;
     }
 
     public String SbidCollectCall(String orderRef, String collectUrl) throws IOException {
         String url = collectUrl;
 
-        HttpClient httpClient = _getNewHttpClient();
+        HttpClient httpClient = getNewHttpClient();
 
         HttpPost httpPost = new HttpPost(url);
         httpPost.setHeader("Accept", "application/json");
@@ -112,36 +109,31 @@ public class HttpMethods {
             Log.d(Constants.TAG_SBID_AUTH, "Got some cookies!");
         }
         String result = HttpResponseToString(httpResponse);
-        Log.d(Constants.TAG_SBID_AUTH, result);
         return result;
     }
 
     public String SbidGetCompleteCall(String completeUrl) throws IOException {
         String url = completeUrl;
 
-        HttpClient httpClient = _getNewHttpClient();
+        HttpClient httpClient = getNewHttpClient();
 
         HttpGet httpGet = new HttpGet(url);
 
         HttpResponse httpResponse = PerformHttpGet(httpClient, httpGet, httpContext);
         String result = HttpResponseToString(httpResponse);
-        Log.d(Constants.TAG_SBID_AUTH, result);
         return result;
     }
 
     public String SignicatVerifyCall(String samlString, String target) throws IOException {
-        String url = "https://labs.signicat.com/catwalk/saml/getattributes";
+        String url = ConfigConstants.RP_VALIDATE_SAML_URL;
 
-        HttpClient httpClient = _getNewHttpClient();
+        HttpClient httpClient = getNewHttpClient();
 
         HttpPost httpPost = new HttpPost(url);
         List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2);
         nameValuePairs.add(new BasicNameValuePair("SAMLResponse", samlString));
         nameValuePairs.add(new BasicNameValuePair("target", target));
         httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-
-        //httpPost.setHeader("Content-type", "application/x-www-form-urlencoded");
-        Log.d(Constants.TAG_SBID_AUTH + "****", httpClient.getParams().toString());
 
         HttpResponse httpResponse = PerformHttpPost(httpClient, httpPost, httpContext);
         if(cookieStore.getCookies().size() > 0){
@@ -167,14 +159,6 @@ public class HttpMethods {
         return url.toString();
     }
 
-//    private static HttpClient GetBasicHttpClient(){
-//        HttpParams httpParams = new BasicHttpParams();
-//        HttpConnectionParams.setConnectionTimeout(httpParams, 30000);
-//        HttpConnectionParams.setSoTimeout(httpParams, 30000);
-//        HttpClient httpClient = new DefaultHttpClient(httpParams);
-//        return httpClient;
-//    }
-
     private static HttpResponse PerformHttpGet(HttpClient httpClient, HttpGet httpRequest, HttpContext httpContext) throws IOException {
         HttpResponse httpResponse = httpClient.execute(httpRequest, httpContext);
         return  httpResponse;
@@ -196,115 +180,22 @@ public class HttpMethods {
         return result;
     }
 
-//    private static HttpClient createHttpsClient()
-//    {
-//        HttpParams params = new BasicHttpParams();
-//        HttpProtocolParams.setVersion(params, HttpVersion.HTTP_1_1);
-//        HttpProtocolParams.setContentCharset(params, HTTP.DEFAULT_CONTENT_CHARSET);
-//        HttpProtocolParams.setUseExpectContinue(params, true);
-//
-//        SchemeRegistry schReg = new SchemeRegistry();
-//        schReg.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
-//        schReg.register(new Scheme("https", SSLSocketFactory.getSocketFactory(), 443));
-//        ClientConnectionManager conMgr = new ThreadSafeClientConnManager(params, schReg);
-//
-//        return new DefaultHttpClient(conMgr, params);
-//    }
-
-    public static HttpClient _getNewHttpClient() {
+    public static HttpClient getNewHttpClient() {
         try {
-            KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-            trustStore.load(null, null);
-
-            SSLSocketFactory sf = new MySSLSocketFactory(trustStore);
-            sf.setHostnameVerifier(SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
+            SchemeRegistry schemeRegistry = new SchemeRegistry();
+            schemeRegistry.register(new Scheme("https",
+                    SSLSocketFactory.getSocketFactory(), 443));
 
             HttpParams params = new BasicHttpParams();
-            HttpProtocolParams.setVersion(params, HttpVersion.HTTP_1_1);
-            HttpProtocolParams.setContentCharset(params, HTTP.UTF_8);
 
-            SchemeRegistry registry = new SchemeRegistry();
-            registry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
-            registry.register(new Scheme("https", sf, 443));
+            SingleClientConnManager mgr = new SingleClientConnManager(params, schemeRegistry);
 
-            ClientConnectionManager ccm = new ThreadSafeClientConnManager(params, registry);
+            HttpClient httpClient = new DefaultHttpClient(mgr, params);
 
-            DefaultHttpClient http = new DefaultHttpClient(ccm, params);
-            UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("jk", "jk");
-            AuthScope authScope = new AuthScope(AuthScope.ANY_HOST, AuthScope.ANY_PORT);
-            http.getCredentialsProvider().setCredentials(authScope, credentials);
-
-            return http;
+            return httpClient;
         } catch (Exception e) {
+            Log.e(Constants.TAG_SBID_AUTH, e.toString());
             return new DefaultHttpClient();
-        }
-    }
-
-    public static HttpClient getHttpClientForVerifyCall(String saml, String target) {
-        try {
-            KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-            trustStore.load(null, null);
-
-            SSLSocketFactory sf = new MySSLSocketFactory(trustStore);
-            sf.setHostnameVerifier(SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
-
-            HttpParams params = new BasicHttpParams();
-            params.setParameter("SAMLResponse", saml);
-            params.setParameter("target", target);
-            HttpProtocolParams.setVersion(params, HttpVersion.HTTP_1_1);
-            HttpProtocolParams.setContentCharset(params, HTTP.UTF_8);
-
-            SchemeRegistry registry = new SchemeRegistry();
-            registry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
-            registry.register(new Scheme("https", sf, 443));
-
-            ClientConnectionManager ccm = new ThreadSafeClientConnManager(params, registry);
-
-            DefaultHttpClient http = new DefaultHttpClient(ccm, params);
-            UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("jk", "jk");
-            AuthScope authScope = new AuthScope(AuthScope.ANY_HOST, AuthScope.ANY_PORT);
-            http.getCredentialsProvider().setCredentials(authScope, credentials);
-
-            return http;
-        } catch (Exception e) {
-            return new DefaultHttpClient();
-        }
-    }
-
-    public static class MySSLSocketFactory extends SSLSocketFactory {
-        SSLContext sslContext = SSLContext.getInstance("TLS");
-
-        public MySSLSocketFactory(KeyStore truststore) throws NoSuchAlgorithmException, KeyManagementException, KeyStoreException, UnrecoverableKeyException {
-            super(truststore);
-
-            TrustManager tm = new X509TrustManager() {
-
-                @Override
-                public void checkClientTrusted(java.security.cert.X509Certificate[] x509Certificates, String s) throws CertificateException {
-
-                }
-
-                @Override
-                public void checkServerTrusted(java.security.cert.X509Certificate[] x509Certificates, String s) throws CertificateException {
-
-                }
-
-                public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-                    return null;
-                }
-            };
-
-            sslContext.init(null, new TrustManager[] { tm }, null);
-        }
-
-        @Override
-        public Socket createSocket(Socket socket, String host, int port, boolean autoClose) throws IOException, UnknownHostException {
-            return sslContext.getSocketFactory().createSocket(socket, host, port, autoClose);
-        }
-
-        @Override
-        public Socket createSocket() throws IOException {
-            return sslContext.getSocketFactory().createSocket();
         }
     }
 }

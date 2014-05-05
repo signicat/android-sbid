@@ -3,7 +3,6 @@
 
     <string name="app_name">SignicatSbid</string>
     <string name="hello_world">Hello world!</string>
-    <string name="title_activity_test">TestActivity</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_sbid_auth">SbidAuthActivity</string>
     <string name="title_activity_success">SuccessActivity</string>

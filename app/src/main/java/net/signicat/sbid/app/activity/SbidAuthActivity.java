@@ -5,7 +5,6 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -16,7 +15,7 @@ import android.widget.Toast;
 
 import net.signicat.sbid.app.R;
 import net.signicat.sbid.app.business.Constants;
-import net.signicat.sbid.app.business.HttpMethods;
+import net.signicat.sbid.app.business.HttpsMethods;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -26,7 +25,7 @@ import java.io.IOException;
 public class SbidAuthActivity extends Activity {
 
     private EditText personalIdEditText;
-    private HttpMethods httpMethods;
+    private HttpsMethods httpsMethods;
 
     //Todo these should be stored and retrieved in a proper and safe manner
     private JSONObject authCallResponseObject;
@@ -40,7 +39,7 @@ public class SbidAuthActivity extends Activity {
         setContentView(R.layout.activity_sbid_auth);
 
         personalIdEditText = (EditText) findViewById(R.id.personalIdEditText);
-        httpMethods = new HttpMethods();
+        httpsMethods = new HttpsMethods();
     }
 
 
@@ -76,7 +75,7 @@ public class SbidAuthActivity extends Activity {
             protected String doInBackground(Void... voids) {
                 String answer = null;
                 try {
-                    answer = httpMethods.SbidAuthenticateCall(personalIdEditText.getText().toString());
+                    answer = httpsMethods.SbidAuthenticateCall(personalIdEditText.getText().toString());
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -127,7 +126,7 @@ public class SbidAuthActivity extends Activity {
             protected String doInBackground(Void... voids) {
                 String answer = null;
                 try {
-                    answer = httpMethods.SbidCollectCall(orderRef, collectUrl);
+                    answer = httpsMethods.SbidCollectCall(orderRef, collectUrl);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -168,7 +167,7 @@ public class SbidAuthActivity extends Activity {
             protected String doInBackground(Void... voids) {
                 String answer = null;
                 try {
-                    answer = httpMethods.SbidGetCompleteCall(completeUrl);
+                    answer = httpsMethods.SbidGetCompleteCall(completeUrl);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -212,7 +211,7 @@ public class SbidAuthActivity extends Activity {
             protected String doInBackground(Void... voids) {
                 String answer = null;
                 try {
-                    answer = httpMethods.SignicatVerifyCall(samlFinal, targetFinal);
+                    answer = httpsMethods.SignicatVerifyCall(samlFinal, targetFinal);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

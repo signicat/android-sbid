@@ -21,12 +21,6 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="net.signicat.sbid.app.activity.TestActivity"
-            android:label="@string/title_activity_test"
-            android:screenOrientation="portrait"
-            android:theme="@android:style/Theme.Holo.NoActionBar" >
-        </activity>
-        <activity
             android:name="net.signicat.sbid.app.activity.SbidAuthActivity"
             android:label="@string/title_activity_sbid_auth"
             android:screenOrientation="portrait"
