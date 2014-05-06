@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 import net.signicat.sbid.app.R;
 
@@ -18,6 +19,12 @@ public class SettingsActivity extends Activity {
     }
 
     public void saveSettingsClick(View target){
+        showToast("The settings they do nothing!");
         finish();
+    }
+
+    private void showToast(String message){
+        Toast toast = Toast.makeText(this, message, Toast.LENGTH_LONG);
+        toast.show();
     }
 }
