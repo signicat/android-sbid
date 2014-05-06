@@ -18,4 +18,8 @@ public class MainActivity extends Activity {
     public void startAuthActivity(View target){
         startActivity(new Intent(this, SbidAuthActivity.class));
     }
+
+    public void startSettingsActivity(View target){
+        startActivity(new Intent(this, SettingsActivity.class));
+    }
 }

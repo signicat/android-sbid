@@ -24,11 +24,12 @@ public class SbidAuthActivity extends Activity {
 
     private EditText personalIdEditText;
     private HttpsMethods httpsMethods;
+    private ProgressDialog progressDialog;
 
-    //Todo these should be stored and retrieved in a proper and safe manner
+    //Todo store in pref storage?
     private JSONObject authCallResponseObject;
 
-    //Todo this is very ugly and should be replaced with fancy intent messaging!
+    //Todo better way?
     private boolean sbidClientStarted = false;
 
     @Override
@@ -42,10 +43,10 @@ public class SbidAuthActivity extends Activity {
 
     public void startAuthCall(View target) {
 
-        ProgressDialog progress = new ProgressDialog(this);
-        progress.setTitle("Authenticating");
-        progress.setMessage("Please wait...");
-        progress.show();
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setTitle(getString(R.string.progress_dialog_authenticating_title));
+        progressDialog.setMessage(getString(R.string.progress_dialog_authenticating_message));
+        progressDialog.show();
 
         AsyncTask<Void, Void, String> makeHttpCallTask = new AsyncTask<Void, Void, String>() {
             @Override
@@ -55,6 +56,8 @@ public class SbidAuthActivity extends Activity {
                     answer = httpsMethods.SbidAuthenticateCall(personalIdEditText.getText().toString());
                 } catch (IOException e) {
                     e.printStackTrace();
+                    progressDialog.dismiss();
+                    //Todo show error to user
                 }
 
                 return answer;
@@ -80,21 +83,21 @@ public class SbidAuthActivity extends Activity {
             if (errorMessage == null || errorMessage == "null") {
                 createAndStartSbidIntent(authCallResponseObject);
             } else if (errorMessage == Constants.ErrorMessageFromServer.ALREADY_IN_PROGRESS.getValue()) {
-                //showMessageToUser(Constants.ErrorMessageToUser.RFA3.getMessage());
-                //Todo handle case correctly
+                //Todo handle case correctly and show RFA3
+                progressDialog.dismiss();
+                //Todo show error to user
             }
 
         } catch (JSONException e) {
             e.printStackTrace();
+            Log.d(Constants.TAG_SBID_ERROR, e.getMessage());
+            Log.d(Constants.TAG_SBID_ERROR, authResponse);
+            progressDialog.dismiss();
+            showToast("Error on auth response");
         }
     }
 
     private void startCollectCall() throws JSONException {
-        final ProgressDialog progress = new ProgressDialog(this);
-        progress.setTitle("Collecting the call");
-        progress.setMessage("Please wait...");
-        progress.show();
-
         final String orderRef = authCallResponseObject.getString("orderRef");
         final String collectUrl = authCallResponseObject.getString("collectUrl");
 
@@ -106,6 +109,8 @@ public class SbidAuthActivity extends Activity {
                     answer = httpsMethods.SbidCollectCall(orderRef, collectUrl);
                 } catch (IOException e) {
                     e.printStackTrace();
+                    progressDialog.dismiss();
+                    //Todo show error to user
                 }
 
                 return answer;
@@ -117,27 +122,24 @@ public class SbidAuthActivity extends Activity {
                     handleCollectCallResponse(ans);
                 } catch (JSONException e) {
                     e.printStackTrace();
+                    Log.d(Constants.TAG_SBID_ERROR, e.getMessage());
+                    Log.d(Constants.TAG_SBID_ERROR, ans);
+                    progressDialog.dismiss();
+                    showToast("Error on handling collectcall response");
                 }
-                progress.dismiss();
             }
         };
         makeHttpCallTask.execute();
     }
 
     private void handleCollectCallResponse(String answer) throws JSONException {
-        showToast("handleCollectCallResponse");
         JSONObject collectResponseObject = new JSONObject(answer);
         startCompleteCall(collectResponseObject);
     }
 
     private void startCompleteCall(JSONObject collectResponseObject) throws JSONException {
 
-        final ProgressDialog progress = new ProgressDialog(this);
-        progress.setTitle("Completing the call");
-        progress.setMessage("Please wait...");
-        progress.show();
-
-        String complete = collectResponseObject.getString("progressStatus");
+        String complete = collectResponseObject.getString("progressStatus"); //Todo remove since we don't use it?
         final String completeUrl = collectResponseObject.getString("completeUrl");
         AsyncTask<Void, Void, String> makeHttpCallTask = new AsyncTask<Void, Void, String>() {
             @Override
@@ -147,6 +149,8 @@ public class SbidAuthActivity extends Activity {
                     answer = httpsMethods.SbidGetCompleteCall(completeUrl);
                 } catch (IOException e) {
                     e.printStackTrace();
+                    progressDialog.dismiss();
+                    //Todo show error to user
                 }
 
                 return answer;
@@ -158,16 +162,15 @@ public class SbidAuthActivity extends Activity {
                     handleCompleteCall(ans);
                 } catch (JSONException e) {
                     e.printStackTrace();
+                    progressDialog.dismiss();
+                    //Todo show error to user
                 }
-                progress.dismiss();
             }
         };
         makeHttpCallTask.execute();
     }
 
     private void handleCompleteCall(String answer) throws JSONException {
-        showToast("HandleCompleteCall");
-        Log.d(Constants.TAG_SBID_AUTH, answer);
         JSONObject jsonObject = new JSONObject(answer);
         String saml = jsonObject.getString("SAMLResponse");
         String target = jsonObject.getString("target");
@@ -175,11 +178,6 @@ public class SbidAuthActivity extends Activity {
     }
 
     private void startVerifySamlResponseCall(String saml, final String target){
-        final ProgressDialog progress = new ProgressDialog(this);
-        progress.setTitle("Verifying the SAML!");
-        progress.setMessage("Please wait...");
-        progress.show();
-
         final String samlFinal = saml;
         final String targetFinal = target;
 
@@ -191,6 +189,8 @@ public class SbidAuthActivity extends Activity {
                     answer = httpsMethods.SignicatVerifyCall(samlFinal, targetFinal);
                 } catch (IOException e) {
                     e.printStackTrace();
+                    progressDialog.dismiss();
+                    //Todo show error to user
                 }
 
                 return answer;
@@ -198,22 +198,18 @@ public class SbidAuthActivity extends Activity {
 
             @Override
             protected void onPostExecute(String ans) {
-
                 handleVerifyResponse(ans);
-                progress.dismiss();
             }
         };
         makeHttpCallTask.execute();
     }
 
     private void handleVerifyResponse(String ans){
-        showToast("handleVerifyResponse");
-        Log.d(Constants.TAG_SBID_AUTH, ans);
-        startActivity(new Intent(SbidAuthActivity.this, SuccessActivity.class));
-    }
-
-    private void showMessageToUser(String message) {
-        //Todo show message to user;
+        if (progressDialog != null && progressDialog.isShowing()){
+            progressDialog.dismiss();
+        }
+        showToast("Success");
+        finish();
     }
 
     private void createAndStartSbidIntent(JSONObject jsonObject) throws JSONException {
@@ -223,7 +219,7 @@ public class SbidAuthActivity extends Activity {
         Intent intent = new Intent();
         intent.setPackage("com.bankid.bus");
         intent.setAction(Intent.ACTION_VIEW);
-        intent.addCategory(Intent.CATEGORY_BROWSABLE); //optional intent.addCategory(Intent.CATEGORY_DEFAULT); //optional
+        intent.addCategory(Intent.CATEGORY_BROWSABLE);
         intent.setType("bankid");
         intent.setData(Uri.parse("bankid://autostarttoken=<" + autoStartToken + ">&redirect=null "));
         startActivityForResult(intent, 0);

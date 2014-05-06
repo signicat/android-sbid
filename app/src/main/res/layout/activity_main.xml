@@ -15,6 +15,8 @@
         android:id="@+id/banner"
         android:layout_marginTop="120dip"
         />
+
+    />
     <Button
         android:layout_width="250dip"
         android:layout_height="60dip"
@@ -24,5 +26,18 @@
         android:onClick="startAuthActivity"
         android:background="@drawable/button_green"
         android:id="@+id/startSbidButton"/>
+
+    <Button
+        android:layout_width="250dip"
+        android:layout_height="60dip"
+        android:layout_marginTop="20dip"
+        android:text="Settings"
+        android:visibility="visible"
+        android:layout_below="@+id/startSbidButton"
+        android:layout_centerHorizontal="true"
+        android:onClick="startSettingsActivity"
+        android:background="@drawable/button_green"
+        android:id="@+id/startSettingsButton"
+        android:layout_marginBottom="20dip"/>
 
 </RelativeLayout>

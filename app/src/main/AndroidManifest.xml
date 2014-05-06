@@ -27,8 +27,11 @@
             android:theme="@android:style/Theme.Holo.NoActionBar" >
         </activity>
         <activity
-            android:name="net.signicat.sbid.app.activity.SuccessActivity"
-            android:label="@string/title_activity_success" >
+            android:name="net.signicat.sbid.app.activity.SettingsActivity"
+            android:label="@string/title_activity_settings"
+            android:screenOrientation="portrait"
+            android:theme="@android:style/Theme.Holo.NoActionBar"
+            >
         </activity>
     </application>
 
