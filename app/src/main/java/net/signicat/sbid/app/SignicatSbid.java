@@ -21,10 +21,10 @@ public class SignicatSbid extends Application {
 
     private void LoadSettings(){
         if(sharedPreferences.contains(Constants.SIGNICAT_URL_PREF_KEY)){
-            ConfigConstants.RP_AUTH_URL = sharedPreferences.getString(Constants.SIGNICAT_URL_PREF_KEY, ConfigConstants.DEFAULT_AUTH_URL);
+            ConfigConstants.RP_AUTH_URL = sharedPreferences.getString(Constants.SIGNICAT_URL_PREF_KEY, ConfigConstants.getDEFAULT_AUTH_URL());
         }
         if(sharedPreferences.contains(Constants.SIGNICAT_API_KEY_PREF_KEY)){
-            ConfigConstants.SIGNICAT_API_KEY = sharedPreferences.getString(Constants.SIGNICAT_API_KEY_PREF_KEY, ConfigConstants.DEFAULT_API_KEY);
+            ConfigConstants.SIGNICAT_API_KEY = sharedPreferences.getString(Constants.SIGNICAT_API_KEY_PREF_KEY, ConfigConstants.getDEFAULT_API_KEY());
         }
     }
 }

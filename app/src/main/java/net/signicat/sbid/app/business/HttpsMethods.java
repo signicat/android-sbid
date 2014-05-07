@@ -2,6 +2,9 @@ package net.signicat.sbid.app.business;
 
 import android.util.Log;
 
+import net.signicat.sbid.app.data.AuthenticatePojo;
+import net.signicat.sbid.app.data.CollectCallPojo;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.CookieStore;
@@ -65,9 +68,9 @@ public class HttpsMethods {
         HttpPost httpPost = new HttpPost(url);
         httpPost.setHeader("Accept", "application/json");
         httpPost.setHeader("Content-type", "application/json");
-        httpPost.setEntity(new StringEntity("{ \"subject\": \""+personalId+"\" }"));
-        //Todo make pojo and make json stuff
-//        httpPost.setEntity(new StringEntity("{ \"apiKey\": \""+ConfigConstants.SIGNICAT_API_KEY+"\" }"));
+
+        AuthenticatePojo authenticatePojo = new AuthenticatePojo(personalId, ConfigConstants.SIGNICAT_API_KEY);
+        httpPost.setEntity(authenticatePojo.getAsJsonAsStringEntity());
 
         HttpResponse httpResponse = PerformHttpPost(httpClient, httpPost, httpContext);
 
@@ -83,7 +86,8 @@ public class HttpsMethods {
         HttpPost httpPost = new HttpPost(url);
         httpPost.setHeader("Accept", "application/json");
         httpPost.setHeader("Content-type", "application/json");
-        httpPost.setEntity(new StringEntity("{ \"orderRef\": \""+orderRef+"\" }"));
+        CollectCallPojo collectCallPojo = new CollectCallPojo(orderRef, ConfigConstants.SIGNICAT_API_KEY);
+        httpPost.setEntity(collectCallPojo.getAsJsonAsStringEntity());
 
         HttpResponse httpResponse = PerformHttpPost(httpClient, httpPost, httpContext);
         String result = HttpResponseToString(httpResponse);
