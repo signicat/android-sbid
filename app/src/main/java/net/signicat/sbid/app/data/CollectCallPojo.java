@@ -9,19 +9,16 @@ import java.io.UnsupportedEncodingException;
 public class CollectCallPojo {
 
     private String orderRef;
-    private String apiKey;
 
 
-    public CollectCallPojo(String orderRef, String apiKey){
+    public CollectCallPojo(String orderRef){
         this.orderRef = orderRef;
-        this.apiKey = apiKey;
     }
 
     public StringEntity getAsJsonAsStringEntity(){
         JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put("orderRef", orderRef);
-            jsonObject.put("apiKey", apiKey);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -32,14 +29,6 @@ public class CollectCallPojo {
             e.printStackTrace();
         }
         return null;
-    }
-
-    public String getApiKey() {
-        return apiKey;
-    }
-
-    public void setApiKey(String apiKey) {
-        this.apiKey = apiKey;
     }
 
     public String getOrderRef() {

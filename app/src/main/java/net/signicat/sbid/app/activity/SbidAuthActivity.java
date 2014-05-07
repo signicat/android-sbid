@@ -26,10 +26,8 @@ public class SbidAuthActivity extends Activity {
     private HttpsMethods httpsMethods;
     private ProgressDialog progressDialog;
 
-    //Todo store in pref storage?
     private JSONObject authCallResponseObject;
 
-    //Todo better way?
     private boolean sbidClientStarted = false;
 
     @Override

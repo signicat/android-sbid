@@ -16,7 +16,6 @@ import org.apache.http.client.protocol.ClientContext;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.conn.ssl.SSLSocketFactory;
-import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.SingleClientConnManager;
@@ -37,9 +36,6 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by Martin on 30.04.14.
- */
 public class HttpsMethods {
 
     private CookieStore cookieStore;
@@ -86,7 +82,7 @@ public class HttpsMethods {
         HttpPost httpPost = new HttpPost(url);
         httpPost.setHeader("Accept", "application/json");
         httpPost.setHeader("Content-type", "application/json");
-        CollectCallPojo collectCallPojo = new CollectCallPojo(orderRef, ConfigConstants.SIGNICAT_API_KEY);
+        CollectCallPojo collectCallPojo = new CollectCallPojo(orderRef);
         httpPost.setEntity(collectCallPojo.getAsJsonAsStringEntity());
 
         HttpResponse httpResponse = PerformHttpPost(httpClient, httpPost, httpContext);
@@ -107,8 +103,6 @@ public class HttpsMethods {
     }
 
     public String SignicatVerifyCall(String samlString, String target) throws IOException {
-        String url = ConfigConstants.RP_VALIDATE_SAML_URL;
-
         HttpClient httpClient = getNewHttpClient();
 
         HttpPost httpPost = new HttpPost(ConfigConstants.TARGET);

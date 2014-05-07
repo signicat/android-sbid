@@ -6,9 +6,6 @@ import android.content.SharedPreferences;
 import net.signicat.sbid.app.business.ConfigConstants;
 import net.signicat.sbid.app.business.Constants;
 
-/**
- * Created by Martin on 06.05.14.
- */
 public class SignicatSbid extends Application {
 
     public static SharedPreferences sharedPreferences;

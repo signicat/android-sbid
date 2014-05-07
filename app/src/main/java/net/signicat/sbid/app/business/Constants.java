@@ -1,8 +1,5 @@
 package net.signicat.sbid.app.business;
 
-/**
- * Created by Martin on 30.04.14.
- */
 public class Constants {
     public static String TAG_SBID_AUTH = "SBID_AUTH";
     public static String TAG_SBID_ERROR = "SBID_ERROR";
