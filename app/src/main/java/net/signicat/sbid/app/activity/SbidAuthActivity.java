@@ -14,6 +14,7 @@ import android.widget.Toast;
 import net.signicat.sbid.app.R;
 import net.signicat.sbid.app.business.Constants;
 import net.signicat.sbid.app.business.HttpsMethods;
+import net.signicat.sbid.app.data.ErrorCodes;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -55,7 +56,6 @@ public class SbidAuthActivity extends Activity {
                 } catch (IOException e) {
                     e.printStackTrace();
                     progressDialog.dismiss();
-                    //Todo show error to user
                 }
 
                 return answer;
@@ -81,9 +81,8 @@ public class SbidAuthActivity extends Activity {
             if (errorMessage == null || errorMessage == "null") {
                 createAndStartSbidIntent(authCallResponseObject);
             } else if (errorMessage == Constants.ErrorMessageFromServer.ALREADY_IN_PROGRESS.getValue()) {
-                //Todo handle case correctly and show RFA3
                 progressDialog.dismiss();
-                //Todo show error to user
+                handleErrorMessage(errorMessage);
             }
 
         } catch (JSONException e) {
@@ -241,6 +240,13 @@ public class SbidAuthActivity extends Activity {
     private void showToast(String message){
         Toast toast = Toast.makeText(this, message, Toast.LENGTH_LONG);
         toast.show();
+    }
+
+    private void handleErrorMessage(String errorMessage){
+        String rfaMessage = ErrorCodes.errorHashMap.get(errorMessage);
+        if(rfaMessage != null){
+            showToast(rfaMessage);
+        }
     }
 
 }
