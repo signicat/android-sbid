@@ -3,7 +3,9 @@
 
     <string name="app_name">SignicatSbid</string>
     <string name="title_activity_sbid_auth">SbidAuthActivity</string>
+
     <string name="message_rfa3">"Action cancelled. Please try again."</string>
+
     <string name="progress_dialog_authenticating_title">Authenticating</string>
     <string name="progress_dialog_authenticating_message">Please wait....</string>
     <string name="title_activity_settings">SettingsActivity</string>

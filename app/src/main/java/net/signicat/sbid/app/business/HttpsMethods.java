@@ -58,7 +58,7 @@ public class HttpsMethods {
         // target anyway so that it may still be validated on the
         // server along with the SAML assertion.
         String target = URLEncoder.encode(ConfigConstants.TARGET, "UTF-8");
-        String url = ConfigConstants.RP_AUTH_URL + target;
+        String url = ConfigConstants.RP_AUTH_URL + "&target=" +target;
 
         HttpClient httpClient = getNewHttpClient();
 
@@ -66,7 +66,8 @@ public class HttpsMethods {
         httpPost.setHeader("Accept", "application/json");
         httpPost.setHeader("Content-type", "application/json");
         httpPost.setEntity(new StringEntity("{ \"subject\": \""+personalId+"\" }"));
-        httpPost.setEntity(new StringEntity("{ \"apiKey\": \""+ConfigConstants.SIGNICAT_API_KEY+"\" }"));
+        //Todo make pojo and make json stuff
+//        httpPost.setEntity(new StringEntity("{ \"apiKey\": \""+ConfigConstants.SIGNICAT_API_KEY+"\" }"));
 
         HttpResponse httpResponse = PerformHttpPost(httpClient, httpPost, httpContext);
 
