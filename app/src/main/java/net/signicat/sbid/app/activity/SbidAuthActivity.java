@@ -80,7 +80,7 @@ public class SbidAuthActivity extends Activity {
 
             if (errorMessage == null || errorMessage == "null") {
                 createAndStartSbidIntent(authCallResponseObject);
-            } else if (errorMessage == Constants.ErrorMessageFromServer.ALREADY_IN_PROGRESS.getValue()) {
+            } else {
                 progressDialog.dismiss();
                 handleErrorMessage(errorMessage);
             }
