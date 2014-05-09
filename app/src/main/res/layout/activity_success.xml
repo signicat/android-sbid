@@ -19,7 +19,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="SUCCESS!"
+        android:text="DONE"
         android:textSize="40sp"
         android:textColor="@color/signicat_white"
         android:visibility="visible"

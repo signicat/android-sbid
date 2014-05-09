@@ -23,7 +23,7 @@
         android:textSize="18sp"
         android:layout_marginLeft="10dip"
         android:layout_below="@+id/banner"
-        android:text="Auth url"
+        android:text="Service URL"
         android:textColor="@color/signicat_white"
         />
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">SignicatSbid</string>
+    <string name="app_name">Signicat Swedish Mobile BankID</string>
     <string name="title_activity_sbid_auth">SbidAuthActivity</string>
 
     <string name="progress_dialog_authenticating_title">Authenticating</string>

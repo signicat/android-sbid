@@ -20,7 +20,7 @@
     <Button
         android:layout_width="250dip"
         android:layout_height="60dip"
-        android:text="Sbid testing"
+        android:text="Start"
         android:layout_below="@+id/banner"
         android:layout_centerHorizontal="true"
         android:onClick="startAuthActivity"
