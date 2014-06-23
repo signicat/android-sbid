@@ -78,7 +78,7 @@ public class SbidAuthActivity extends Activity {
                 Log.d(Constants.TAG_SBID_AUTH, errorMessage);
             }
 
-            if (errorMessage == null || errorMessage == "null") {
+            if (errorMessage == null || errorMessage.contentEquals("null")) {
                 createAndStartSbidIntent(authCallResponseObject);
             } else {
                 progressDialog.dismiss();
@@ -218,7 +218,7 @@ public class SbidAuthActivity extends Activity {
         intent.setAction(Intent.ACTION_VIEW);
         intent.addCategory(Intent.CATEGORY_BROWSABLE);
         intent.setType("bankid");
-        intent.setData(Uri.parse("bankid://autostarttoken=<" + autoStartToken + ">&redirect=null "));
+        intent.setData(Uri.parse("bankid://autostarttoken=" + autoStartToken + "&redirect=null "));
         startActivityForResult(intent, 0);
 
         sbidClientStarted = true;
